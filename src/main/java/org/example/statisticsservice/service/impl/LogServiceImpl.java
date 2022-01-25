@@ -41,20 +41,11 @@ public class LogServiceImpl implements LogService {
     @Override
     public List<LogMongoDTO> getAllLogs() {
         log.info("ConsumerServiceImpl - Method getAllLogs");
-        /*
         List<LogMongoDTO> logsMongo = logRepository.findAll().stream()
                 .map(logMongo -> new ModelMapper().map(logMongo, LogMongoDTO.class))
                 .collect(Collectors.toList());
-
-         */
-        List<LogMongo> logsMongo = logRepository.findAll();
-        List<LogMongoDTO> logsMongoDTO = new ArrayList<>();
-        for (LogMongo logMongo : logsMongo) {
-            log.info("LogMongo: "+logMongo);
-            logsMongoDTO.add(new ModelMapper().map(logMongo, LogMongoDTO.class));
-        }
         log.info("ConsumerServiceImpl - Return getAllLogs: "+logsMongo);
-        return logsMongoDTO;
+        return logsMongo;
     }
 
     @Override

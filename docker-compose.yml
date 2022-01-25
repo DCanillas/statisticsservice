@@ -1,39 +1,100 @@
 version: '3'
 services:
-  mongo:
-    container_name: mongo
-    image: mongo
+
+  liquibase:
+    container_name: "liquibase"
+    image: liquibase.jar
+    build:
+      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/liquibase"
+      dockerfile: "Dockerfile"
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 1234
-      MONGO_INITDB_DATABASE: log_db
+      - "8000:8000"
     networks:
       - spring-net
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
 
-  zookeeper:
-    container_name: zookeeper
-    image: wurstmeister/zookeeper
+  product-service:
+    container_name: "product-service"
+    image: product-service.jar
+    build:
+      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/productservice"
+      dockerfile: "Dockerfile"
     ports:
-      - "2181:2181"
+      - "8080:8080"
     networks:
       - spring-net
-
-  kafka:
-    container_name: kafka
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      EUREKA_HOST: discovery-service
+      EUREKA_PORT: 8761
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
     depends_on:
-      - zookeeper
+      - liquibase
+
+  recommendation-service:
+    container_name: "recommendation-service"
+    image: recommendation-service.jar
+    build:
+      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/recommendationservice"
+      dockerfile: "Dockerfile"
+    ports:
+      - "9090:9090"
     networks:
       - spring-net
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      EUREKA_HOST: discovery-service
+      EUREKA_PORT: 8761
+    depends_on:
+      - liquibase
 
+  gateway-service:
+    container_name: "gateway-service"
+    image: gateway-service.jar
+    build:
+      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/gatewayservice"
+      dockerfile: "Dockerfile"
+    ports:
+      - "9000:9000"
+    networks:
+      - spring-net
+    environment:
+      EUREKA_HOST: discovery-service
+      EUREKA_PORT: 8761
+    depends_on:
+      - liquibase
+      - product-service
+      - recommendation-service
 
+  statistics-service:
+    container_name: "statistics-service"
+    image: statistics-service.jar
+    build:
+      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/statisticsservice"
+      dockerfile: "Dockerfile"
+    ports:
+      - "7000:7000"
+    networks:
+      - spring-net
+    environment:
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
+      MONGODB_USERNAME: root
+      MONGODB_PASSWORD: 1234
+      MONGODB_DATABASE: log_db
+      MONGODB_PORT: 27017
+      MONGODB_HOST: mongo
 
 networks:
   spring-net:

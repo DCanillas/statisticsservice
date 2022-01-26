@@ -3,6 +3,7 @@ package org.example.statisticsservice.controller;
 import org.example.modelproject.dto.LogMongoDTO;
 import org.example.statisticsservice.service.impl.LogServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,17 +20,19 @@ public class LogController {
 
     // get all logs
     @GetMapping("")
-    public List<LogMongoDTO> getAllLogs(){ return consumerService.getAllLogs();}
+    public ResponseEntity<List<LogMongoDTO>> getAllLogs(){
+        return ResponseEntity.ok().body(consumerService.getAllLogs());
+    }
 
     // get by id
     @GetMapping("/{id}")
-    public LogMongoDTO getLogById(@PathVariable(value = "id") long id){
-        return consumerService.getLogById(id);
+    public ResponseEntity<LogMongoDTO> getLogById(@PathVariable(value = "id") long id){
+        return ResponseEntity.ok().body(consumerService.getLogById(id));
     }
 
     // create log
     @PostMapping("")
-    public LogMongoDTO createCustomer(@RequestBody LogMongoDTO logMongoDTO){
-        return consumerService.saveLog(logMongoDTO);
+    public ResponseEntity<LogMongoDTO> createCustomer(@RequestBody LogMongoDTO logMongoDTO){
+        return ResponseEntity.ok().body(consumerService.saveLog(logMongoDTO));
     }
 }

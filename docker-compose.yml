@@ -1,22 +1,6 @@
 version: '3'
 services:
 
-  liquibase:
-    container_name: "liquibase"
-    image: liquibase.jar
-    build:
-      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/liquibase"
-      dockerfile: "Dockerfile"
-    ports:
-      - "8000:8000"
-    networks:
-      - spring-net
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1234
-
   product-service:
     container_name: "product-service"
     image: product-service.jar
@@ -36,8 +20,6 @@ services:
       EUREKA_PORT: 8761
       KAFKA_HOST: kafka
       KAFKA_PORT: 9092
-    depends_on:
-      - liquibase
 
   recommendation-service:
     container_name: "recommendation-service"
@@ -56,8 +38,6 @@ services:
       MYSQL_PASSWORD: 1234
       EUREKA_HOST: discovery-service
       EUREKA_PORT: 8761
-    depends_on:
-      - liquibase
 
   gateway-service:
     container_name: "gateway-service"
@@ -73,7 +53,6 @@ services:
       EUREKA_HOST: discovery-service
       EUREKA_PORT: 8761
     depends_on:
-      - liquibase
       - product-service
       - recommendation-service
 

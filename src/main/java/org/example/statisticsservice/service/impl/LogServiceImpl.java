@@ -22,17 +22,19 @@ import static org.example.modelproject.model.LogMongo.SEQUENCE_NAME;
 public class LogServiceImpl implements LogService {
     private final LogRepository logRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public LogServiceImpl(LogRepository logRepository, SequenceGeneratorService sequenceGeneratorService) {
+    public LogServiceImpl(LogRepository logRepository, SequenceGeneratorService sequenceGeneratorService, ModelMapper modelMapper) {
         this.logRepository = logRepository;
         this.sequenceGeneratorService = sequenceGeneratorService;
+        this.modelMapper = modelMapper;
     }
 
     @KafkaListener(topics = "orders", groupId= "orderGroup")
     public void consumeFromTopic(LogMongoDTO logMongoDTO){
         log.info("ConsumerServiceImpl - consumeFromTopic: "+logMongoDTO);
-        LogMongo logMongo = new ModelMapper().map(logMongoDTO, LogMongo.class);
+        LogMongo logMongo = modelMapper.map(logMongoDTO, LogMongo.class);
         //generate sequence
         logMongo.setId(sequenceGeneratorService.getSequenceNumber(SEQUENCE_NAME));
         logRepository.save(logMongo);
@@ -42,7 +44,7 @@ public class LogServiceImpl implements LogService {
     public List<LogMongoDTO> getAllLogs() {
         log.info("ConsumerServiceImpl - Method getAllLogs");
         List<LogMongoDTO> logsMongo = logRepository.findAll().stream()
-                .map(logMongo -> new ModelMapper().map(logMongo, LogMongoDTO.class))
+                .map(logMongo -> modelMapper.map(logMongo, LogMongoDTO.class))
                 .collect(Collectors.toList());
         log.info("ConsumerServiceImpl - Return getAllLogs: "+logsMongo);
         return logsMongo;
@@ -54,17 +56,17 @@ public class LogServiceImpl implements LogService {
         LogMongo logMongo = logRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found for this id :: " + id));
         log.info("ConsumerServiceImpl - Return getById: "+logMongo);
-        return new ModelMapper().map(logMongo, LogMongoDTO.class);
+        return modelMapper.map(logMongo, LogMongoDTO.class);
     }
 
     @Override
     public LogMongoDTO saveLog(LogMongoDTO logMongoDTO) {
         log.info("ConsumerServiceImpl - Method saveLog: "+logMongoDTO);
-        LogMongo logMongo = new ModelMapper().map(logMongoDTO, LogMongo.class);
+        LogMongo logMongo = modelMapper.map(logMongoDTO, LogMongo.class);
         //generate sequence
         logMongo.setId(sequenceGeneratorService.getSequenceNumber(SEQUENCE_NAME));
         LogMongo logMongoCreated = logRepository.save(logMongo);
         log.info("ConsumerServiceImpl - Created saveLog: "+logMongoCreated);
-        return new ModelMapper().map(logMongoCreated, LogMongoDTO.class);
+        return modelMapper.map(logMongoCreated, LogMongoDTO.class);
     }
 }

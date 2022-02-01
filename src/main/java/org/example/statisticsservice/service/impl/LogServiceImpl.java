@@ -11,7 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +36,7 @@ public class LogServiceImpl implements LogService {
         this.modelMapper = modelMapper;
     }
 
-    @KafkaListener(topics = "orders", groupId= "orderGroup")
+    @KafkaListener(topics = "requests", groupId= "requestGroup")
     public void consumeFromTopic(LogMongoDTO logMongoDTO){
         log.info("ConsumerServiceImpl - consumeFromTopic: "+logMongoDTO);
         LogMongo logMongo = modelMapper.map(logMongoDTO, LogMongo.class);
@@ -68,5 +73,50 @@ public class LogServiceImpl implements LogService {
         LogMongo logMongoCreated = logRepository.save(logMongo);
         log.info("ConsumerServiceImpl - Created saveLog: "+logMongoCreated);
         return modelMapper.map(logMongoCreated, LogMongoDTO.class);
+    }
+
+    @Override
+    public List<LogMongoDTO> getLogsByDate(Date from, Date to) {
+        log.info("ConsumerServiceImpl - Method getLogByDate");
+        List<LogMongoDTO> logsMongo = logRepository.findAll().stream()
+                .map(logMongo -> modelMapper.map(logMongo, LogMongoDTO.class))
+                .collect(Collectors.toList());
+        log.info("ConsumerServiceImpl - Logs found:  {}", logsMongo);
+
+        List<LogMongoDTO> logsMongoInDate = new ArrayList<>();
+        from = formatingDate(from, true);
+        to = formatingDate(to, false);
+
+        log.info("ConsumerServiceImpl - From: {}, - To: {}", from, to);
+        for (LogMongoDTO logMongoDTO : logsMongo) {
+            if (logMongoDTO.getTime().after(from) && logMongoDTO.getTime().before(to)){
+                logsMongoInDate.add(logMongoDTO);
+            }
+        }
+        log.info("ConsumerServiceImpl - Return getLogByDate: {}",logsMongoInDate);
+        return logsMongoInDate;
+    }
+
+    private Date formatingDate(Date date, Boolean from) {
+        if (date == null){
+            date = new Date(System.currentTimeMillis());
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            if (from){
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+            } else {
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 59);
+            }
+            java.util.Date dateUtil = cal.getTime();
+            date = new Date(dateUtil.getTime());
+        }
+        return date;
     }
 }

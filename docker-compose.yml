@@ -38,6 +38,8 @@ services:
       MYSQL_PASSWORD: 1234
       EUREKA_HOST: discovery-service
       EUREKA_PORT: 8761
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
 
   gateway-service:
     container_name: "gateway-service"

@@ -5,7 +5,7 @@ services:
     container_name: "product-service"
     image: product-service.jar
     build:
-      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/productservice"
+      context: "${PRODUCT_CONTEXT}"
       dockerfile: "Dockerfile"
     ports:
       - "8080:8080"
@@ -25,7 +25,7 @@ services:
     container_name: "recommendation-service"
     image: recommendation-service.jar
     build:
-      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/recommendationservice"
+      context: "${RECOMMENDATION_CONTEXT}"
       dockerfile: "Dockerfile"
     ports:
       - "9090:9090"
@@ -45,7 +45,7 @@ services:
     container_name: "gateway-service"
     image: gateway-service.jar
     build:
-      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/gatewayservice"
+      context: "${GATEWAY_CONTEXT}"
       dockerfile: "Dockerfile"
     ports:
       - "9000:9000"
@@ -62,7 +62,7 @@ services:
     container_name: "statistics-service"
     image: statistics-service.jar
     build:
-      context: "/mnt/c/Users/Daniel_Canillas/Documents/Training Project/statisticsservice"
+      context: "${STATISTICS_CONTEXT}"
       dockerfile: "Dockerfile"
     ports:
       - "7000:7000"

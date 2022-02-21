@@ -76,6 +76,26 @@ services:
       MONGODB_DATABASE: log_db
       MONGODB_PORT: 27017
       MONGODB_HOST: mongo
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+
+  authentication-service:
+    container_name: "authentication-service"
+    image: authentication-service.jar
+    build:
+      context: "${AUTHENTICATION_CONTEXT}"
+      dockerfile: "Dockerfile"
+    ports:
+      - "9080:9080"
+    networks:
+      - spring-net
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
 
 networks:
   spring-net:

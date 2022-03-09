@@ -2,12 +2,8 @@ package org.example.statisticsservice.security.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
-import org.example.statisticsservice.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Slf4j
 @Component
@@ -19,20 +15,8 @@ public class JwtUtils {
   @Value("${jwtExpirationMs}")
   private int jwtExpirationMs;
 
-  public String generateJwtToken(Authentication authentication) {
-
-    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
-    return Jwts.builder()
-        .setSubject((userPrincipal.getUsername()))
-        .setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
-        .compact();
-  }
-
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().get("username").toString();
   }
 
   public boolean validateJwtToken(String authToken) {
@@ -53,4 +37,5 @@ public class JwtUtils {
 
     return false;
   }
+
 }
